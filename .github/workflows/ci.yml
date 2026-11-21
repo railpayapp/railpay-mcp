@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # railpay-sdk comes from file:../railpay-sdk, so CI checks it out next to this repo:
+    #   <workspace>/main         -> this repo
+    #   <workspace>/railpay-sdk  -> the SDK
+    defaults:
+      run:
+        working-directory: main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          repository: railpayapp/railpay-sdk
+          path: railpay-sdk
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: main/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            main/pnpm-lock.yaml
+            railpay-sdk/pnpm-lock.yaml
+      - name: Build railpay-sdk
+        working-directory: railpay-sdk
+        run: pnpm install --frozen-lockfile && pnpm build
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
