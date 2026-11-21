@@ -12,7 +12,7 @@ Payments are real: USDG on Robinhood Chain (chain id 4663), using x402 v2, schem
 | `railpay_fetch` | HTTP request that pays a `402` automatically, then returns status, body (cut at 20,000 characters) and the payment with its transaction link | yes |
 | `railpay_pay_requirement` | Signs a payment for a 402 the agent already has and returns the `PAYMENT-SIGNATURE` header to retry with | yes, once the seller settles it |
 | `railpay_send` | Pays another RailPay agent (`agt_…`) | yes |
-| `railpay_network` | Public facts: chain, USDG, x402 settings, facilitators, relayer status, payment totals. No key needed | no |
+| `railpay_network` | Public facts: chain, USDG, x402 settings, facilitators, relayer status. No key needed | no |
 
 ## Setup
 

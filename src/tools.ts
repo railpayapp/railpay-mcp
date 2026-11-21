@@ -18,7 +18,7 @@ import {
 export type Deps = {
   /** null when RAILPAY_AGENT_KEY is not set: only the public tools work. */
   agent: RailPay | null;
-  /** Public client (no key) for config/stats. */
+  /** Public client (no key) for the network config. */
   public: RailPay;
   fetch: typeof fetch;
   /** Hard ceiling per tool call, in base units, applied on top of the agent's policy. */
@@ -207,7 +207,7 @@ export async function send(deps: Deps, input: SendInput) {
 // ---------- railpay_network ----------
 
 export async function network(deps: Deps) {
-  const [config, stats] = await Promise.all([deps.public.config(), deps.public.stats()]);
+  const config = await deps.public.config();
   return {
     chain: config.chain_name ?? "Robinhood Chain",
     chain_id: config.chain_id,
@@ -218,8 +218,6 @@ export async function network(deps: Deps) {
     relayer_status: config.relayer_status,
     gas: config.gas,
     x402: config.x402,
-    payments: stats.payments,
-    outside_team: stats.outside,
     agent_key_set: deps.agent !== null,
     max_per_call_usdg: fromUnits(deps.maxPerCall),
   };

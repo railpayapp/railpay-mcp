@@ -102,7 +102,7 @@ export function createServer(deps: Deps): McpServer {
     {
       title: "RailPay network",
       description:
-        "Public RailPay network facts: chain, USDG contract, x402 settings, the facilitators that pay settlement gas, relayer status, and payment totals. Needs no agent key.",
+        "Public RailPay network facts: chain, USDG contract, x402 settings, the facilitators that pay settlement gas, and relayer status. Needs no agent key.",
       inputSchema: {},
       annotations: { readOnlyHint: true, openWorldHint: true },
     },

@@ -31,7 +31,7 @@ const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit
   calls.push({ url: req.url, method: req.method, body, auth: req.headers.get("authorization") });
   const path = req.url.replace(API, "");
   if (req.url.startsWith(API)) {
-    if (apiError && path !== "/v1/config" && path !== "/v1/stats") return Response.json({ error: apiError.error, message: apiError.message }, { status: apiError.status });
+    if (apiError && path !== "/v1/config") return Response.json({ error: apiError.error, message: apiError.message }, { status: apiError.status });
     if (path === "/v1/agent/me")
       return Response.json({
         agent: {
@@ -49,7 +49,6 @@ const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit
     if (path === "/v1/agent/send") return Response.json({ tx_hash: TX, tx_url: `https://robinhoodchain.blockscout.com/tx/${TX}`, amount: JSON.parse(body).amount });
     if (path === "/v1/config")
       return Response.json({ chain_id: 4663, chain_name: "Robinhood Chain", network: NETWORK, facilitators: ["https://x402.t0ll.xyz"], relayer_status: "coming_soon", x402: { min_amount: 1000 } });
-    if (path === "/v1/stats") return Response.json({ payments: { count: 0, volume: "0.00", payers: 0 }, outside: { count: 0, volume: "0.00", payers: 0 } });
   }
   if (req.url === `${SELLER}/data`) {
     if (req.headers.get("payment-signature") === "signed-payment") {
