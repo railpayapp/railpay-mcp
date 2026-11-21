@@ -1,0 +1,55 @@
+{
+  "name": "railpay-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that lets an AI agent pay for x402 resources and send USDG from its RailPay agent wallet on Robinhood Chain.",
+  "license": "MIT",
+  "homepage": "https://docs.railpay.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/railpayapp/railpay-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/railpayapp/railpay-mcp/issues"
+  },
+  "author": "RailPay",
+  "type": "module",
+  "bin": {
+    "railpay-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "keywords": [
+    "railpay",
+    "mcp",
+    "model-context-protocol",
+    "x402",
+    "usdg",
+    "robinhood-chain",
+    "ai-agents",
+    "payments"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "railpay-sdk": "file:../railpay-sdk",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "packageManager": "pnpm@12.16.1"
+}
