@@ -1,3 +1,5 @@
+![railpay-mcp: RailPay](.github/banner.png)
+
 # railpay-mcp
 
 An [MCP](https://modelcontextprotocol.io) server that gives an AI agent a [RailPay](https://railpay.app) wallet. The agent can pay for x402 resources and pay other agents in USDG on Robinhood Chain, within limits you set.
@@ -97,6 +99,13 @@ pnpm install
 pnpm typecheck && pnpm test && pnpm build
 pnpm smoke   # starts the server over stdio and calls railpay_network on the live network, read-only
 ```
+
+## Links
+
+- Website: https://railpay.app
+- Docs: https://docs.railpay.app
+- Dapp: https://dapp.railpay.app
+- SDK: https://github.com/railpayapp/railpay-sdk
 
 ## License
 
