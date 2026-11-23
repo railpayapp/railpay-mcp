@@ -217,7 +217,10 @@ export async function network(deps: Deps) {
     facilitators: config.facilitators,
     relayer_status: config.relayer_status,
     gas: config.gas,
+    gas_note: config.gas_note ?? null,
     x402: config.x402,
+    settled_treasury_payments: config.settlements?.treasury_receipts ?? [],
+    token: config.token ?? null,
     agent_key_set: deps.agent !== null,
     max_per_call_usdg: fromUnits(deps.maxPerCall),
   };

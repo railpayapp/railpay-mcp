@@ -6,7 +6,7 @@ import { z } from "zod";
 import { agentInfo, network, paidFetch, payRequirement, send, type Deps } from "./tools.js";
 
 export const SERVER_NAME = "railpay-mcp";
-export const SERVER_VERSION = "0.1.0";
+export const SERVER_VERSION = "0.2.0";
 
 const USDG_AMOUNT = z.string().regex(/^\d+(\.\d{1,6})?$/, 'USDG as a decimal string, e.g. "0.01"');
 
@@ -102,7 +102,7 @@ export function createServer(deps: Deps): McpServer {
     {
       title: "RailPay network",
       description:
-        "Public RailPay network facts: chain, USDG contract, x402 settings, the facilitators that pay settlement gas, and relayer status. Needs no agent key.",
+        "Public RailPay network facts: chain, USDG contract, x402 settings, the facilitators that pay settlement gas, relayer status, x402 payments settled to the RailPay treasury (tx + block, team wallets marked) and the $RPAY token's role. Needs no agent key.",
       inputSchema: {},
       annotations: { readOnlyHint: true, openWorldHint: true },
     },

@@ -48,7 +48,17 @@ const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit
     if (path === "/v1/agent/pay") return Response.json({ payment: "signed-payment", header: "PAYMENT-SIGNATURE", authorization: {}, valid_before: 1, amount: "0.01", spent_today: "0.04" });
     if (path === "/v1/agent/send") return Response.json({ tx_hash: TX, tx_url: `https://robinhoodchain.blockscout.com/tx/${TX}`, amount: JSON.parse(body).amount });
     if (path === "/v1/config")
-      return Response.json({ chain_id: 4663, chain_name: "Robinhood Chain", network: NETWORK, facilitators: ["https://x402.t0ll.xyz"], relayer_status: "coming_soon", x402: { min_amount: 1000 } });
+      return Response.json({
+        chain_id: 4663,
+        chain_name: "Robinhood Chain",
+        network: NETWORK,
+        facilitators: ["https://x402.t0ll.xyz"],
+        relayer_status: "coming_soon",
+        gas_note: "x402 payments need no relayer",
+        x402: { min_amount: 1000 },
+        settlements: { about: "", guide: "", treasury_receipts: [{ tx: TX, block: 121421058, log_index: 44, amount: "0.002", asset: "USDG", payer: "0x2c92a59abf4a39b4db228fecb73e2ddaa900e611", payer_is_team: true, resource: "/x402/quote", settled_at: "2026-11-23T12:52:00.000Z", explorer: `https://robinhoodchain.blockscout.com/tx/${TX}` }] },
+        token: { symbol: "RPAY", address: "0xf8a9170f198fc8b7ef58265ec00768fb26abb23d", role: "none today", page: "https://railpay.app/token" },
+      });
   }
   if (req.url === `${SELLER}/data`) {
     if (req.headers.get("payment-signature") === "signed-payment") {
@@ -106,6 +116,11 @@ describe("railpay-mcp", () => {
     const r = await call(client, "railpay_network");
     expect(r.isError).toBeFalsy();
     expect(r.structuredContent).toMatchObject({ chain_id: 4663, relayer_status: "coming_soon", agent_key_set: false, max_per_call_usdg: "0.1" });
+    expect(r.structuredContent).toMatchObject({
+      gas_note: "x402 payments need no relayer",
+      settled_treasury_payments: [{ tx: TX, block: 121421058, payer_is_team: true }],
+      token: { symbol: "RPAY" },
+    });
     expect(calls.every((c) => c.auth === null)).toBe(true);
   });
 
