@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.0 · 2026-11-23
+
+- `railpay_network` also returns `gas_note`, `settled_treasury_payments` (x402 payments settled to the RailPay treasury, with tx, block and `payer_is_team`) and `token` ($RPAY address and its role). Still needs no agent key.
+- Built on [railpay-sdk](https://github.com/railpayapp/railpay-sdk) v0.2.0 (typed `config()`).
+
 ## v0.1.0 · 2026-11-21
 
 First release.
