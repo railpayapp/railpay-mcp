@@ -15,6 +15,7 @@ Payments are real: USDG on Robinhood Chain (chain id 4663), using x402 v2, schem
 | `railpay_pay_requirement` | Signs a payment for a 402 the agent already has and returns the `PAYMENT-SIGNATURE` header to retry with | yes, once the seller settles it |
 | `railpay_send` | Pays another RailPay agent (`agt_…`) | yes |
 | `railpay_network` | Public facts: chain, USDG, x402 settings, facilitators, relayer status, settled treasury payments (tx + block, team wallets marked), $RPAY role. No key needed | no |
+| `railpay_verify_payment` | Checks a payment transaction on Robinhood Chain from the receipt itself, not from RailPay or the seller: payer, recipient, USDG amount, EIP-3009 nonce, gas payer, block. Optional `pay_to` and `amount` must match. No key needed | no |
 
 ## Setup
 
@@ -63,9 +64,10 @@ claude mcp add railpay \
 
 | Variable | Default | |
 |---|---|---|
-| `RAILPAY_AGENT_KEY` | none | Agent key. Without it only `railpay_network` works |
+| `RAILPAY_AGENT_KEY` | none | Agent key. Without it only `railpay_network` and `railpay_verify_payment` work |
 | `RAILPAY_MAX_PER_CALL` | `0.1` | Most USDG one tool call may spend. A tool's `max_amount` can lower it, never raise it |
 | `RAILPAY_BASE_URL` | `https://dapp.railpay.app` | RailPay API |
+| `RAILPAY_RPC_URL` | `https://robinhood-rpc.publicnode.com` | Robinhood Chain JSON-RPC that `railpay_verify_payment` reads |
 
 Logs go to stderr. Stdout carries the MCP protocol.
 
@@ -97,7 +99,7 @@ Also:
 ```sh
 pnpm install
 pnpm typecheck && pnpm test && pnpm build
-pnpm smoke   # starts the server over stdio and calls railpay_network on the live network, read-only
+pnpm smoke   # starts the server over stdio, calls railpay_network and railpay_verify_payment on the live network, read-only
 ```
 
 ## Links

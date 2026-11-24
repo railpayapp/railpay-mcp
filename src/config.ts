@@ -21,6 +21,7 @@ export function depsFromEnv(env: NodeJS.ProcessEnv = process.env): Deps {
     public: new RailPay({ baseUrl }),
     fetch: (input, init) => globalThis.fetch(input, init),
     maxPerCall,
+    rpcUrl: env.RAILPAY_RPC_URL?.trim() || undefined,
     log: (message) => process.stderr.write(`[railpay-mcp] ${message}\n`),
   };
 }

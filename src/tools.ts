@@ -9,6 +9,7 @@ import {
   toUnits,
   txUrl,
   unb64json,
+  verifyPayment,
   withPayment,
   type PaymentEvent,
   type PaymentRequired,
@@ -23,6 +24,8 @@ export type Deps = {
   fetch: typeof fetch;
   /** Hard ceiling per tool call, in base units, applied on top of the agent's policy. */
   maxPerCall: bigint;
+  /** Robinhood Chain JSON-RPC for railpay_verify_payment. Default: the SDK's (publicnode). */
+  rpcUrl?: string;
   log: (message: string) => void;
 };
 
@@ -224,4 +227,16 @@ export async function network(deps: Deps) {
     agent_key_set: deps.agent !== null,
     max_per_call_usdg: fromUnits(deps.maxPerCall),
   };
+}
+
+// ---------- railpay_verify_payment ----------
+
+export type VerifyInput = { tx: string; pay_to?: string; amount?: string };
+
+/** Reads a payment from the chain itself (not from the RailPay API) and says whether it settled as expected. */
+export async function verify(deps: Deps, input: VerifyInput) {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(input.tx)) throw new RailPayError(0, "invalid_tx", "tx must be a 0x-prefixed 32-byte transaction hash");
+  const v = await verifyPayment(input.tx, { payTo: input.pay_to, amount: input.amount, rpcUrl: deps.rpcUrl, fetch: deps.fetch });
+  deps.log(`verified ${v.tx}: ${v.ok ? `ok, ${v.amount} USDG to ${v.pay_to} in block ${v.block}` : v.reason}`);
+  return { ...v, source: "Read from Robinhood Chain over JSON-RPC, not from the RailPay API." };
 }

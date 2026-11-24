@@ -3,10 +3,10 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { RailPayError } from "railpay-sdk";
 import { z } from "zod";
 
-import { agentInfo, network, paidFetch, payRequirement, send, type Deps } from "./tools.js";
+import { agentInfo, network, paidFetch, payRequirement, send, verify, type Deps } from "./tools.js";
 
 export const SERVER_NAME = "railpay-mcp";
-export const SERVER_VERSION = "0.2.0";
+export const SERVER_VERSION = "0.3.0";
 
 const USDG_AMOUNT = z.string().regex(/^\d+(\.\d{1,6})?$/, 'USDG as a decimal string, e.g. "0.01"');
 
@@ -107,6 +107,22 @@ export function createServer(deps: Deps): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: true },
     },
     async () => run(deps, () => network(deps)),
+  );
+
+  server.registerTool(
+    "railpay_verify_payment",
+    {
+      title: "Verify a payment on chain",
+      description:
+        "Checks a payment transaction on Robinhood Chain by reading its receipt straight from the chain, not from RailPay or the seller. Returns ok, the payer, recipient and USDG amount, the EIP-3009 authorization nonce, who paid the gas, the block and its time. Pass pay_to and amount to check the money went where it should, in the exact amount. Use it before trusting a claim that something was paid. Needs no agent key and spends nothing.",
+      inputSchema: {
+        tx: z.string().regex(/^0x[0-9a-fA-F]{64}$/, "0x-prefixed 32-byte transaction hash").describe("Transaction hash to check."),
+        pay_to: z.string().regex(/^0x[0-9a-fA-F]{40}$/, "0x address").optional().describe("Expected recipient address."),
+        amount: USDG_AMOUNT.optional().describe("Expected amount in USDG, exact match."),
+      },
+      annotations: { readOnlyHint: true, openWorldHint: true },
+    },
+    async (args) => run(deps, () => verify(deps, args)),
   );
 
   return server;

@@ -11,6 +11,34 @@ const API = "https://api.test";
 const SELLER = "https://seller.test";
 const PAY_TO = "0x2222222222222222222222222222222222222222";
 const TX = `0x${"ab".repeat(32)}`;
+const RPC = "https://rpc.test";
+// The first x402 settlement to the RailPay treasury (block 121421058), as the RPC returns it.
+const SETTLED = "0x988a0174792c1de16af8922b84324efd6f4fa6f2c7f0dd6eaebb5b16a9f641b0";
+const NONCE = "0xb543c896e4d11b7c71344d2e5430a631fa7703cbb448487dd77060336ffdcb42";
+const RECEIPT = {
+  status: "0x1",
+  blockNumber: "0x73cbd02",
+  from: "0x619538f76ba880a85e3db265694cdba0a66acc4d",
+  gasUsed: "0x191f7",
+  logs: [
+    {
+      address: USDG.toLowerCase(),
+      topics: ["0x98de503528ee59b575ef0c0a2576a82497bfc029a5685b209e9ec333479b10a5", "0x0000000000000000000000002c92a59abf4a39b4db228fecb73e2ddaa900e611", NONCE],
+      data: "0x",
+      logIndex: "0x2b",
+    },
+    {
+      address: USDG.toLowerCase(),
+      topics: [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x0000000000000000000000002c92a59abf4a39b4db228fecb73e2ddaa900e611",
+        "0x000000000000000000000000c74444dd7c6183b0f810487ef9dab8d7333a3709",
+      ],
+      data: "0x00000000000000000000000000000000000000000000000000000000000007d0",
+      logIndex: "0x2c",
+    },
+  ],
+};
 
 const required = (amount: string, network = NETWORK): PaymentRequired => ({
   x402Version: 2,
@@ -30,6 +58,11 @@ const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit
   const body = await req.text();
   calls.push({ url: req.url, method: req.method, body, auth: req.headers.get("authorization") });
   const path = req.url.replace(API, "");
+  if (req.url === `${RPC}/`) {
+    const { method, params } = JSON.parse(body) as { method: string; params: string[] };
+    if (method === "eth_getTransactionReceipt") return Response.json({ jsonrpc: "2.0", id: 1, result: params[0] === SETTLED ? RECEIPT : null });
+    if (method === "eth_getBlockByNumber") return Response.json({ jsonrpc: "2.0", id: 1, result: { timestamp: "0x6b0436f0" } });
+  }
   if (req.url.startsWith(API)) {
     if (apiError && path !== "/v1/config") return Response.json({ error: apiError.error, message: apiError.message }, { status: apiError.status });
     if (path === "/v1/agent/me")
@@ -79,6 +112,7 @@ function deps(withKey = true, maxPerCall = 100_000n): Deps {
     public: new RailPay({ baseUrl: API, fetch: f }),
     fetch: f,
     maxPerCall,
+    rpcUrl: RPC,
     log: () => {},
   };
 }
@@ -105,10 +139,32 @@ beforeEach(() => {
 });
 
 describe("railpay-mcp", () => {
-  it("lists the five tools", async () => {
+  it("lists the six tools", async () => {
     const client = await connect(deps());
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["railpay_agent", "railpay_fetch", "railpay_network", "railpay_pay_requirement", "railpay_send"]);
+    expect(tools.map((t) => t.name).sort()).toEqual(["railpay_agent", "railpay_fetch", "railpay_network", "railpay_pay_requirement", "railpay_send", "railpay_verify_payment"]);
+  });
+
+  it("railpay_verify_payment reads the payment from the chain, without a key", async () => {
+    const client = await connect(deps(false));
+    const r = await call(client, "railpay_verify_payment", { tx: SETTLED, pay_to: "0xc74444dd7c6183b0f810487ef9dab8d7333a3709", amount: "0.002" });
+    expect(r.isError).toBeFalsy();
+    expect(r.structuredContent).toMatchObject({
+      ok: true,
+      block: 121421058,
+      settled_at: "2026-11-23T12:52:00.000Z",
+      amount: "0.002",
+      authorization: { nonce: NONCE },
+      gas_used: 102903,
+      checks: { succeeded: true, transfer: true, pay_to: true, amount: true, authorization: true },
+    });
+    expect(calls.every((c) => c.url === `${RPC}/`)).toBe(true);
+
+    const wrong = await call(client, "railpay_verify_payment", { tx: SETTLED, amount: "0.5" });
+    expect(wrong.structuredContent).toMatchObject({ ok: false, reason: "amount_mismatch" });
+
+    const unknown = await call(client, "railpay_verify_payment", { tx: TX });
+    expect(unknown.structuredContent).toMatchObject({ ok: false, reason: "not_found" });
   });
 
   it("railpay_network works without an agent key", async () => {
