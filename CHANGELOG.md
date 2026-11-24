@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.0 · 2026-11-24
+
+- New tool `railpay_verify_payment { tx, pay_to?, amount? }`: checks a payment on Robinhood Chain from the transaction receipt, not from RailPay or the seller. Returns `ok`, payer, recipient, USDG amount, the EIP-3009 authorization nonce, who paid the gas, the block and its time. Needs no agent key and spends nothing.
+- New env `RAILPAY_RPC_URL` (default publicnode) for that read.
+- `pnpm smoke` also verifies the latest settled treasury payment on chain.
+- Built on [railpay-sdk](https://github.com/railpayapp/railpay-sdk) v0.3.0 (`verifyPayment`).
+
 ## v0.2.0 · 2026-11-23
 
 - `railpay_network` also returns `gas_note`, `settled_treasury_payments` (x402 payments settled to the RailPay treasury, with tx, block and `payer_is_team`) and `token` ($RPAY address and its role). Still needs no agent key.

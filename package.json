@@ -1,6 +1,6 @@
 {
   "name": "railpay-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server that lets an AI agent pay for x402 resources and send USDG from its RailPay agent wallet on Robinhood Chain.",
   "license": "MIT",
   "homepage": "https://docs.railpay.app",
